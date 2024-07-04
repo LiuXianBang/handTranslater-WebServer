@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "jquery": "^3.7.1",
-    "three": "^0.164.1",
-    "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "three": "^0.166.0",
+    "vue": "^3.4.29",
+    "vue-router": "^4.3.3"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.4",
-    "vite": "^5.2.8"
+    "@vitejs/plugin-vue": "^5.0.5",
+    "vite": "^5.3.1"
   }
 }

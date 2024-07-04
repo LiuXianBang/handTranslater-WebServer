@@ -1,6 +1,5 @@
 <script setup>
 
-
 import { onMounted, onBeforeMount } from 'vue'
 import $ from 'jquery';
 import * as THREE from 'three';
@@ -14,14 +13,6 @@ function SetOwner(Owner, obj) {
         SetOwner(Owner, obj.children[i]);
     }
 }
-function getURLParameters() {
-    var urlParams = new URLSearchParams(window.location.search);
-    var paramsArray = new Array();
-    urlParams.forEach(function (value, key) {
-        paramsArray[key] = value;
-    });
-    return paramsArray;
-}
 
 
 onBeforeMount(() => {
@@ -31,6 +22,7 @@ onBeforeMount(() => {
 onMounted(() => {
 
     document.title = 'Home';
+    var clock = new THREE.Clock();
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -61,39 +53,62 @@ onMounted(() => {
     scene.add(dirLight);
 
     const loader = new GLTFLoader();
+
+    var mixer;
+
+    function make_Animation(model, animations) {
+        mixer = new THREE.AnimationMixer( model );
+
+        for ( let i = 0; i < animations.length; i ++ ) {
+          const clip = animations[ i ];
+          console.log(clip.name)
+        }
+        var url = new URL(window.location.href)
+        const paramsStr = url.search.slice(1)
+        const params = new URLSearchParams(paramsStr)
+        // console.log(params.get("animate"))
+        if(params.get("animate") != null && params.get("animate") != ""){
+          
+          const clip = THREE.AnimationClip.findByName(animations,params.get("animate"));
+          if(clip){
+            const action = mixer.clipAction( clip );
+            action.play();
+          }
+
+        }
+    }
     loader.load('src/assets/models/RobotExpressive.glb', function (gltf) {
         gltf.scene.lookAt(camera.position);
         gltf.scene.name = "导游";
+        gltf.scene.position.y = -2.5;
+
         //Create world
         SetOwner("导游", gltf.scene);
         scene.add(gltf.scene);
+
+        make_Animation(gltf.scene,gltf.animations)
     })
-    camera.position.z = 10;
+
+    camera.position.x = 3;
+    camera.position.y = 0;
+    camera.position.z = 3;
+
 
     function animate() {
         requestAnimationFrame(animate);
-        for (let id in scene.children) {
-            const obj = scene.children[id];
-
-            if (obj.name == "导游") {
-                obj.rotation.y += 0.01;
-                obj.rotation.x += 0.01;
-            }
-        }
-
+        const dt = clock.getDelta();
+        if ( mixer ) mixer.update( dt );
         controls.update();
         renderer.render(scene, camera);
+
     }
 
     animate();
 })
-
-
 </script>
 
 <template>
-    <canvas id="renderCanvas" class="renderArea"></canvas>
-
+  <canvas id="renderCanvas" class="renderArea"></canvas>
 </template>
 <style scoped>
 .renderArea {
